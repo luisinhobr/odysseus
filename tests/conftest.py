@@ -92,3 +92,24 @@ def pytest_collection_modifyitems(config, items):
         path = getattr(item, "path", None) or item.fspath
         for marker_name in markers_for_path(path):
             item.add_marker(getattr(pytest.mark, marker_name))
+import pytest
+@pytest.fixture
+def protected_context():
+    """Ensure security read-only/workspace context isolation between tests.
+
+    The RAG/classification changes added ContextVar-based guards
+    (src.security._turn_readonly, src.tool_execution._active_workspace) that
+    leak across tests unless explicitly reset. Tests that exercise tools
+    guarded by @requires_write_access / assert_not_readonly should depend on
+    this fixture.
+    """
+    from src.security import _turn_readonly, _turn_readonly_reason
+    from src.tool_execution import _active_workspace
+
+    ro_token = _turn_readonly.set(False)
+    reason_token = _turn_readonly_reason.set(None)
+    ws_token = _active_workspace.set(None)
+    yield
+    _turn_readonly.reset(ro_token)
+    _turn_readonly_reason.reset(reason_token)
+    _active_workspace.reset(ws_token)
