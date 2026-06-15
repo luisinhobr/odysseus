@@ -22,6 +22,7 @@ from src.chat_handler import ChatHandler
 from src.research_handler import ResearchHandler
 from src.upload_handler import UploadHandler
 from src.search import update_search_config
+from src.skill_vector import get_skill_vector
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,8 @@ def initialize_managers(base_dir: str, rag_manager=None) -> Dict[str, Any]:
     # Initialize core managers
     memory_manager = MemoryManager(DATA_DIR)
     skills_manager = SkillsManager(DATA_DIR)
+
+
     session_manager = SessionManager(SESSIONS_FILE)
     set_session_manager(session_manager)  # Enable Session.add_message() persistence
     upload_handler = UploadHandler(base_dir, UPLOAD_DIR)
@@ -115,6 +118,7 @@ def initialize_managers(base_dir: str, rag_manager=None) -> Dict[str, Any]:
         "research_handler": research_handler,
         "chat_handler": chat_handler,
         "model_discovery": model_discovery,
+        "skill_vector": skill_vector,
         "current_presets": preset_manager.presets,
         "PERSONAL_INDEX": personal_docs_manager.index
     }
